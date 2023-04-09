@@ -66,14 +66,13 @@ class WatchListAV(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        else:
-            return Response(serializer.errors)
+        return Response(serializer.errors)
 
 class WatchListDetailsAV(APIView):
     def put(self,request,pk):
         try:
             movies=WatchList.objects.get(pk=pk)
-        except:
+        except Exception:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer=WatchListSerializer(movies,data=request.data)
         if serializer.is_valid():
@@ -154,18 +153,17 @@ class ReviewList(generics.ListAPIView):
 
     # queryset=Review.objects.all()
     serializer_class=ReviewSerializer
+    permission_classes=[IsAuthenticated]
 
     def get_queryset(self):
         pk=self.kwargs.get('pk')
-        queryset=Review.objects.filter(watchlist=pk)
-
-        return queryset
+        return Review.objects.filter(watchlist=pk)
     
 
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset=Review.objects.all()
     serializer_class=ReviewSerializer
-    permission_classes=[ReviewUserOrReadOnly]
+    permission_classes=[IsAuthenticatedOrReadOnly]
 
 
 class ReviewCreate(generics.CreateAPIView):
@@ -193,6 +191,16 @@ class ReviewCreate(generics.CreateAPIView):
 
         if user.exists():
             raise ValidationError("U have already given review")
+        
+        if watchlist.avg_rating == 0:
+            watchlist.avg_rating=serializer.validated_data['rating']
+        else:
+            watchlist.avg_rating=(watchlist.avg_rating + serializer.validated_data['rating'])/2
+
+        watchlist.number_rating=watchlist.number_rating+1
+
+        watchlist.save()
+
         serializer.save(watchlist=watchlist,review_user=review_user)    
         
 

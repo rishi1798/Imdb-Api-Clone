@@ -5,8 +5,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     review_user=serializers.StringRelatedField()
     class Meta:
         model=Review
-        fields="__all__"
-        # exclude=['watchlist']
+        # fields="__all__"
+        exclude=['watchlist']
 
 
 
