@@ -8,7 +8,7 @@ from rest_framework import viewsets
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAdminUser,IsAuthenticated,IsAuthenticatedOrReadOnly
-from rest_app.permissions import ReviewUserOrReadOnly,AdminOrReadOnly
+from rest_app.permissions import IsReviewUserOrReadOnly,IsAdminOrReadOnly
 
 from .models import WatchList,StreamPlatform,Review
 from .serializers import WatchListSerializer,StreamPlatformSerializer,ReviewSerializer
@@ -23,14 +23,14 @@ from .serializers import WatchListSerializer,StreamPlatformSerializer,ReviewSeri
 
 # Views using viewset class
 class WatchListViewSet(viewsets.ViewSet):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAdminOrReadOnly]
 
     def list(self,request):
         watchlist=WatchList.objects.all()
         serializer=WatchListSerializer(watchlist,many=True,context={'request': request})
         return Response(serializer.data)
     
-    def retrieve(self,request,pk):
+    def retrieve(self,request,pk=None):
         try:
             watchlist=WatchList.objects.get(pk=pk)
         except WatchList.DoesNotExist:
@@ -53,7 +53,9 @@ class WatchListViewSet(viewsets.ViewSet):
 # Class based Views
 
 class WatchListAV(APIView):
-    
+    permission_classes=[IsAdminOrReadOnly]
+
+
     def get(self,request):
         movies=WatchList.objects.all()
         
@@ -69,6 +71,9 @@ class WatchListAV(APIView):
         return Response(serializer.errors)
 
 class WatchListDetailsAV(APIView):
+    permission_classes=[IsAdminOrReadOnly]
+
+
     def put(self,request,pk):
         try:
             movies=WatchList.objects.get(pk=pk)
@@ -97,7 +102,8 @@ class WatchListDetailsAV(APIView):
 
 
 class StreamListAV(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAdminOrReadOnly]
+
 
     def get(self,request):
         try:
@@ -117,6 +123,9 @@ class StreamListAV(APIView):
         return Response({"error":"Invalid data"},status=status.HTTP_400_BAD_REQUEST)
     
 class StreamDetailsAV(APIView):
+    permission_classes=[IsAdminOrReadOnly]
+
+
     def get(self,request,pk):
         try:
             platform=StreamPlatform.objects.get(pk=pk)
@@ -163,7 +172,7 @@ class ReviewList(generics.ListAPIView):
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset=Review.objects.all()
     serializer_class=ReviewSerializer
-    permission_classes=[IsAuthenticatedOrReadOnly]
+    permission_classes=[IsReviewUserOrReadOnly]
 
 
 class ReviewCreate(generics.CreateAPIView):

@@ -13,7 +13,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class WatchListSerializer(serializers.ModelSerializer):
     
     # url=serializers.HyperlinkedIdentityField(view_name="watchlist-detail",lookup_field='pk')
-    reviews=ReviewSerializer(many=True)
+    reviews=ReviewSerializer(many=True,required=False)
     # platform = serializers.HyperlinkedIdentityField(
     #     view_name="streamplatform-details",
     #     lookup_field='pk'
@@ -24,9 +24,9 @@ class WatchListSerializer(serializers.ModelSerializer):
         fields="__all__"
         
 
-class StreamPlatformSerializer(serializers.HyperlinkedModelSerializer):
-    watchlist=WatchListSerializer(many=True)
-    url=serializers.HyperlinkedIdentityField(view_name="streamplatform-details",lookup_field='pk')
+class StreamPlatformSerializer(serializers.ModelSerializer):
+    # watchlist=WatchListSerializer(many=True)
+    # url=serializers.HyperlinkedIdentityField(view_name="streamplatform-details",lookup_field='pk')
     class Meta:
         model=StreamPlatform
         fields='__all__'
